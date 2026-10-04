@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_P2P_AsIs" targetNamespace="https://github.com/chiamakaikpo">
+  <bpmn:collaboration id="Collab_P2P_AsIs">
+    <bpmn:participant id="Pool_P2P_AsIs" name="Procure-to-pay (as-is)" processRef="P2P_AsIs"/>
+  </bpmn:collaboration>
+  <bpmn:process id="P2P_AsIs" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_0" name="Requester">
+        <bpmn:flowNodeRef>s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a7</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1" name="Procurement">
+        <bpmn:flowNodeRef>a2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a6</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_2" name="Budget holder">
+        <bpmn:flowNodeRef>a5</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_3" name="Finance (AP)">
+        <bpmn:flowNodeRef>a8</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a9</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>e</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s" name="Need identified">
+      <bpmn:outgoing>F_s_a1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="a1" name="Email request to procurement">
+      <bpmn:incoming>F_s_a1</bpmn:incoming>
+      <bpmn:outgoing>F_a1_a2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a2" name="Check request for missing details">
+      <bpmn:incoming>F_a1_a2</bpmn:incoming>
+      <bpmn:incoming>F_a3_a2</bpmn:incoming>
+      <bpmn:outgoing>F_a2_g1</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="g1" name="Complete?">
+      <bpmn:incoming>F_a2_g1</bpmn:incoming>
+      <bpmn:outgoing>F_g1_a3</bpmn:outgoing>
+      <bpmn:outgoing>F_g1_a4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="a3" name="Resend with missing details">
+      <bpmn:incoming>F_g1_a3</bpmn:incoming>
+      <bpmn:outgoing>F_a3_a2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a4" name="Work out approver and email for approval">
+      <bpmn:incoming>F_g1_a4</bpmn:incoming>
+      <bpmn:outgoing>F_a4_a5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a5" name="Approve by email reply">
+      <bpmn:incoming>F_a4_a5</bpmn:incoming>
+      <bpmn:outgoing>F_a5_a6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a6" name="Raise PO; collect supplier documents ad hoc">
+      <bpmn:incoming>F_a5_a6</bpmn:incoming>
+      <bpmn:outgoing>F_a6_a7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a7" name="Receive goods">
+      <bpmn:incoming>F_a6_a7</bpmn:incoming>
+      <bpmn:outgoing>F_a7_a8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a8" name="Match PO, receipt and invoice by hand">
+      <bpmn:incoming>F_a7_a8</bpmn:incoming>
+      <bpmn:outgoing>F_a8_a9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a9" name="Pay supplier">
+      <bpmn:incoming>F_a8_a9</bpmn:incoming>
+      <bpmn:outgoing>F_a9_e</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="e" name="Supplier paid">
+      <bpmn:incoming>F_a9_e</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_s_a1" sourceRef="s" targetRef="a1"/>
+    <bpmn:sequenceFlow id="F_a1_a2" sourceRef="a1" targetRef="a2"/>
+    <bpmn:sequenceFlow id="F_a2_g1" sourceRef="a2" targetRef="g1"/>
+    <bpmn:sequenceFlow id="F_g1_a3" name="No" sourceRef="g1" targetRef="a3"/>
+    <bpmn:sequenceFlow id="F_a3_a2" sourceRef="a3" targetRef="a2"/>
+    <bpmn:sequenceFlow id="F_g1_a4" name="Yes" sourceRef="g1" targetRef="a4"/>
+    <bpmn:sequenceFlow id="F_a4_a5" sourceRef="a4" targetRef="a5"/>
+    <bpmn:sequenceFlow id="F_a5_a6" sourceRef="a5" targetRef="a6"/>
+    <bpmn:sequenceFlow id="F_a6_a7" sourceRef="a6" targetRef="a7"/>
+    <bpmn:sequenceFlow id="F_a7_a8" sourceRef="a7" targetRef="a8"/>
+    <bpmn:sequenceFlow id="F_a8_a9" sourceRef="a8" targetRef="a9"/>
+    <bpmn:sequenceFlow id="F_a9_e" sourceRef="a9" targetRef="e"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_P2P_AsIs">
+    <bpmndi:BPMNPlane id="Plane_P2P_AsIs" bpmnElement="Collab_P2P_AsIs">
+      <bpmndi:BPMNShape id="Pool_P2P_AsIs_di" bpmnElement="Pool_P2P_AsIs" isHorizontal="true"><dc:Bounds x="0" y="0" width="1724" height="520"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0_di" bpmnElement="Lane_0" isHorizontal="true"><dc:Bounds x="34" y="0" width="1690" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1_di" bpmnElement="Lane_1" isHorizontal="true"><dc:Bounds x="34" y="130" width="1690" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_2_di" bpmnElement="Lane_2" isHorizontal="true"><dc:Bounds x="34" y="260" width="1690" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_3_di" bpmnElement="Lane_3" isHorizontal="true"><dc:Bounds x="34" y="390" width="1690" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_di" bpmnElement="s"><dc:Bounds x="111" y="47" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a1_di" bpmnElement="a1"><dc:Bounds x="221" y="31" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a2_di" bpmnElement="a2"><dc:Bounds x="371" y="161" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="g1_di" bpmnElement="g1" isMarkerVisible="true"><dc:Bounds x="554" y="170" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a3_di" bpmnElement="a3"><dc:Bounds x="521" y="31" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a4_di" bpmnElement="a4"><dc:Bounds x="671" y="161" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a5_di" bpmnElement="a5"><dc:Bounds x="821" y="291" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a6_di" bpmnElement="a6"><dc:Bounds x="971" y="161" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a7_di" bpmnElement="a7"><dc:Bounds x="1121" y="31" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a8_di" bpmnElement="a8"><dc:Bounds x="1271" y="421" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a9_di" bpmnElement="a9"><dc:Bounds x="1421" y="421" width="116" height="68"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="e_di" bpmnElement="e"><dc:Bounds x="1611" y="437" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F_s_a1_di" bpmnElement="F_s_a1"><di:waypoint x="147" y="65"/><di:waypoint x="221" y="65"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a1_a2_di" bpmnElement="F_a1_a2"><di:waypoint x="337" y="65"/><di:waypoint x="354" y="65"/><di:waypoint x="354" y="195"/><di:waypoint x="371" y="195"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a2_g1_di" bpmnElement="F_a2_g1"><di:waypoint x="487" y="195"/><di:waypoint x="554" y="195"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_g1_a3_di" bpmnElement="F_g1_a3"><di:waypoint x="579" y="170"/><di:waypoint x="579" y="99"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a3_a2_di" bpmnElement="F_a3_a2"><di:waypoint x="579" y="99"/><di:waypoint x="579" y="246"/><di:waypoint x="429" y="246"/><di:waypoint x="429" y="229"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_g1_a4_di" bpmnElement="F_g1_a4"><di:waypoint x="604" y="195"/><di:waypoint x="671" y="195"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a4_a5_di" bpmnElement="F_a4_a5"><di:waypoint x="787" y="195"/><di:waypoint x="804" y="195"/><di:waypoint x="804" y="325"/><di:waypoint x="821" y="325"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a5_a6_di" bpmnElement="F_a5_a6"><di:waypoint x="937" y="325"/><di:waypoint x="954" y="325"/><di:waypoint x="954" y="195"/><di:waypoint x="971" y="195"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a6_a7_di" bpmnElement="F_a6_a7"><di:waypoint x="1087" y="195"/><di:waypoint x="1104" y="195"/><di:waypoint x="1104" y="65"/><di:waypoint x="1121" y="65"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a7_a8_di" bpmnElement="F_a7_a8"><di:waypoint x="1237" y="65"/><di:waypoint x="1254" y="65"/><di:waypoint x="1254" y="455"/><di:waypoint x="1271" y="455"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a8_a9_di" bpmnElement="F_a8_a9"><di:waypoint x="1387" y="455"/><di:waypoint x="1421" y="455"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_a9_e_di" bpmnElement="F_a9_e"><di:waypoint x="1537" y="455"/><di:waypoint x="1611" y="455"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,86 @@
+{
+  "pain_points": [
+    {"id": "P-01", "text": "Requisitions arrive incomplete, which causes back-and-forth before a PO can be raised.", "impact": "Rework for procurement; slower cycle time for requesters."},
+    {"id": "P-02", "text": "Approval routing depends on people knowing who to email.", "impact": "Approvals stall or go to the wrong person; no reliable record of who approved what."},
+    {"id": "P-03", "text": "Supplier onboarding documents are collected inconsistently.", "impact": "POs can be issued to suppliers whose due diligence (KYC) is incomplete: a regulatory risk."},
+    {"id": "P-04", "text": "Three-way match (PO, goods receipt, invoice) is checked by hand.", "impact": "Payment delays, late-payment friction with suppliers, and errors that are hard to trace."}
+  ],
+  "stakeholders": [
+    ["SH-01", "Requesting departments", "Fast, simple way to buy what they need", "Medium", "High", "Keep informed; involve in UAT", "Requester"],
+    ["SH-02", "Procurement team", "Fair sourcing, controlled spend, less rework", "High", "High", "Manage closely; co-design", "Procurement"],
+    ["SH-03", "Finance / Accounts payable", "Invoices match POs and receipts; budget control", "High", "High", "Manage closely; own approval matrix and tolerances", "Finance"],
+    ["SH-04", "Compliance & internal audit", "Full audit trail, supplier due diligence (KYC)", "High", "Medium", "Manage closely; sign off controls", "Compliance"],
+    ["SH-05", "Suppliers", "Clear onboarding, on-time payment", "Low", "Medium", "Keep informed", "-"]
+  ],
+  "requirements": [
+    {"id": "BR-01", "type": "Business", "text": "Every purchase must be traceable from request to payment, including who approved it and when.", "priority": "Must", "source": "P-02, P-03", "story": "US-02, US-07"},
+    {"id": "BR-02", "type": "Business", "text": "No purchase order may be issued to a supplier whose due diligence is not verified.", "priority": "Must", "source": "P-03", "story": "US-03, US-05"},
+    {"id": "BR-03", "type": "Business", "text": "Invoices that match the PO and goods receipt within tolerance are paid without manual checking.", "priority": "Must", "source": "P-04", "story": "US-04"},
+    {"id": "FR-01", "type": "Functional", "text": "The requisition form enforces mandatory fields (item description, quantity, estimated value, cost centre, budget code, need-by date, spend category) and blocks submission until they are complete.", "priority": "Must", "source": "P-01", "story": "US-01"},
+    {"id": "FR-02", "type": "Functional", "text": "After a cost centre is selected, only budget codes valid for that cost centre are offered.", "priority": "Must", "source": "P-01", "story": "US-01"},
+    {"id": "FR-03", "type": "Functional", "text": "The system routes each requisition to approvers using the approval matrix (value threshold and spend category).", "priority": "Must", "source": "P-02", "story": "US-02"},
+    {"id": "FR-04", "type": "Functional", "text": "Approvers see remaining budget for the cost centre alongside the request value.", "priority": "Should", "source": "P-02", "story": "US-06"},
+    {"id": "FR-05", "type": "Functional", "text": "Approval requests not actioned within 2 working days are escalated to the approver's delegate.", "priority": "Should", "source": "P-02", "story": "US-08"},
+    {"id": "FR-06", "type": "Functional", "text": "Supplier status (Pending, Verified, Expired, Blocked) is held on the supplier record; a PO cannot be issued unless status is Verified.", "priority": "Must", "source": "P-03", "story": "US-03"},
+    {"id": "FR-07", "type": "Functional", "text": "Supplier onboarding uses a standard document checklist; compliance is notified 30 days before any document expires.", "priority": "Should", "source": "P-03", "story": "US-05"},
+    {"id": "FR-08", "type": "Functional", "text": "Requesters confirm goods or service receipt in the system against the PO.", "priority": "Must", "source": "P-04", "story": "US-09"},
+    {"id": "FR-09", "type": "Functional", "text": "The system matches invoice, PO and goods receipt on quantity and price; matches within tolerance are marked ready for payment, mismatches go to an exception queue with the reason.", "priority": "Must", "source": "P-04", "story": "US-04"},
+    {"id": "FR-10", "type": "Functional", "text": "Requesters can see the status of their requisition at each stage.", "priority": "Could", "source": "P-01", "story": "US-10"},
+    {"id": "FR-11", "type": "Functional", "text": "A monthly report shows cycle time, first-time-complete rate, match rate and spend with unverified suppliers.", "priority": "Should", "source": "All", "story": "US-11"},
+    {"id": "NFR-01", "type": "Non-functional", "text": "Every create, approve, reject, change and payment action is logged with user, timestamp and before/after values; the log cannot be edited.", "priority": "Must", "source": "P-02", "story": "US-07"},
+    {"id": "NFR-02", "type": "Non-functional", "text": "Role-based access; segregation of duties so the same person cannot raise and approve a requisition, or create a supplier and approve a payment to it.", "priority": "Must", "source": "P-02, P-03", "story": "US-12"},
+    {"id": "NFR-03", "type": "Non-functional", "text": "Audit records are retained for the period required by the bank's record-retention policy.", "priority": "Must", "source": "P-03", "story": "US-07"}
+  ],
+  "rules": [
+    ["BRL-01", "Approval matrix (illustrative values)", "Up to ₦1m: line manager. ₦1m–₦10m: line manager + budget holder. Over ₦10m: + Head of Procurement and Finance Director."],
+    ["BRL-02", "Category approvals", "IT hardware/software also needs IT approval; legal or consultancy services also need Legal approval, at any value."],
+    ["BRL-03", "Match tolerance (to be agreed with Finance)", "Price: ±2% per line. Quantity: no over-receipt; under-receipt is matched to the quantity received."],
+    ["BRL-04", "Supplier status", "Only Verified suppliers can receive POs. Status becomes Expired automatically when a mandatory document passes its expiry date."],
+    ["BRL-05", "Segregation of duties", "The requester cannot approve their own requisition. Whoever creates a supplier cannot approve payments to that supplier."]
+  ],
+  "stories": [
+    {"id": "US-01", "role": "requester", "want": "a guided requisition form with mandatory fields and budget codes", "so": "I do not have to resubmit my request", "priority": "Must", "points": 5, "epic": "Requisition",
+     "ac": ["Given a required field is empty, when I try to submit, then the form blocks submission and highlights the field.", "Given I have selected a cost centre, then only budget codes valid for that cost centre are shown."]},
+    {"id": "US-02", "role": "procurement officer", "want": "requisitions to route to the right approver automatically by value threshold and category", "so": "I no longer chase approvals by email", "priority": "Must", "points": 8, "epic": "Approval",
+     "ac": ["Given a requisition exceeds an approval threshold, when it is approved at one level, then it routes to the next level automatically.", "Every approval records the approver, timestamp and decision."]},
+    {"id": "US-03", "role": "compliance officer", "want": "the system to block POs to any supplier whose due diligence documents are not verified", "so": "we never pay an unvetted supplier", "priority": "Must", "points": 5, "epic": "Supplier onboarding",
+     "ac": ["Given a supplier's status is Pending, when a PO is raised for that supplier, then the system blocks it and shows which documents are missing."]},
+    {"id": "US-04", "role": "accounts payable officer", "want": "invoices matched automatically to POs and goods receipts", "so": "I only handle real exceptions", "priority": "Must", "points": 8, "epic": "Invoice to pay",
+     "ac": ["Given the invoice, PO and receipt match within tolerance, then the invoice is marked ready for payment.", "Given a mismatch, then the invoice goes to the exception queue with the reason."]},
+    {"id": "US-05", "role": "compliance officer", "want": "a standard onboarding checklist and alerts before documents expire", "so": "supplier files stay complete without manual tracking", "priority": "Should", "points": 5, "epic": "Supplier onboarding",
+     "ac": ["Given a new supplier, then all checklist documents must be uploaded before status can be set to Verified.", "Given a document expires in 30 days, then compliance receives a notification."]},
+    {"id": "US-06", "role": "budget holder", "want": "to see remaining budget next to each request", "so": "I can decide without asking finance", "priority": "Should", "points": 3, "epic": "Approval",
+     "ac": ["Given a requisition assigned to me, when I open it, then I see the cost centre, budget remaining and request value.", "Given approving would exceed budget, then I must enter a reason to approve."]},
+    {"id": "US-07", "role": "internal auditor", "want": "a complete, uneditable history of each purchase", "so": "I can evidence controls without rebuilding email trails", "priority": "Must", "points": 5, "epic": "Controls",
+     "ac": ["Given any requisition, PO or invoice, then I can view every action with user, timestamp and before/after values.", "No user, including administrators, can edit or delete audit entries."]},
+    {"id": "US-08", "role": "requester", "want": "stalled approvals to escalate automatically", "so": "my request does not wait while an approver is away", "priority": "Should", "points": 3, "epic": "Approval",
+     "ac": ["Given an approval has not been actioned for 2 working days, then it is sent to the approver's delegate and the requester is notified."]},
+    {"id": "US-09", "role": "requester", "want": "to confirm receipt of goods against the PO in the system", "so": "finance can match and pay the invoice", "priority": "Must", "points": 2, "epic": "Invoice to pay",
+     "ac": ["Given goods arrive, when I record the received quantity against the PO, then a goods receipt is created and linked to the PO."]},
+    {"id": "US-10", "role": "requester", "want": "to see where my requisition is", "so": "I do not have to email procurement for updates", "priority": "Could", "points": 3, "epic": "Requisition",
+     "ac": ["Given I open my requisitions, then each shows its current stage and who it is waiting on."]},
+    {"id": "US-11", "role": "head of procurement", "want": "a monthly report of P2P performance", "so": "I can show the process is under control", "priority": "Should", "points": 5, "epic": "Reporting",
+     "ac": ["The report shows requisition-to-PO cycle time, first-time-complete rate, first-time match rate and spend with unverified suppliers (which must be zero)."]},
+    {"id": "US-12", "role": "compliance officer", "want": "segregation of duties enforced by the system", "so": "no single person can complete a purchase alone", "priority": "Must", "points": 5, "epic": "Controls",
+     "ac": ["Given I raised a requisition, then I cannot approve it.", "Given I created a supplier, then I cannot approve payments to that supplier."]}
+  ],
+  "raci": {
+    "roles": ["Requester", "Procurement", "Finance", "Compliance"],
+    "rows": [
+      ["Raise requisition", "R/A", "I", "I", "-"],
+      ["Source & select supplier", "C", "R/A", "I", "C"],
+      ["Supplier due diligence", "-", "R", "-", "A"],
+      ["Approve PO", "I", "R", "A", "-"],
+      ["Confirm goods receipt", "R/A", "I", "I", "-"],
+      ["Match & pay invoice", "-", "C", "R/A", "-"]
+    ]
+  },
+  "kpis": [
+    ["Requisition-to-PO cycle time", "Median working days from requisition submitted to PO issued", "Reduce (baseline to be measured in discovery)"],
+    ["First-time-complete requisitions", "Requisitions approved without being returned for missing information ÷ all requisitions", "≥ 95%"],
+    ["Spend with unverified suppliers", "PO value issued to suppliers not in Verified status", "Zero"],
+    ["First-time match rate", "Invoices matched within tolerance without manual intervention ÷ all invoices", "≥ 85%"],
+    ["Invoice-to-pay time", "Median days from invoice receipt to payment", "Within agreed supplier terms"],
+    ["Audit findings on P2P", "Internal audit findings raised against the P2P process", "Downward trend"]
+  ]
+}
